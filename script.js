@@ -62,12 +62,48 @@ function openVideoPopup(videoSrc) {
     let modal = document.getElementById('videoModal');
     if (!modal) {
         modal = createVideoModal();
+    } else {
+        // If modal exists in HTML, ensure event listeners are attached
+        attachModalListeners(modal);
     }
     
     const video = document.getElementById('modalVideo');
     video.src = videoSrc;
     modal.classList.add('active');
     video.play();
+}
+
+// Attach event listeners to modal (for modals that exist in HTML)
+function attachModalListeners(modal) {
+    // Remove any existing listeners by cloning and replacing
+    const closeBtn = modal.querySelector('.close-modal');
+    if (closeBtn && !closeBtn.dataset.hasListeners) {
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const video = document.getElementById('modalVideo');
+            if (video) {
+                video.pause();
+                video.currentTime = 0;
+            }
+            modal.classList.remove('active');
+        });
+        closeBtn.dataset.hasListeners = 'true';
+    }
+    
+    // Close on background click
+    if (!modal.dataset.hasListeners) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                const video = document.getElementById('modalVideo');
+                if (video) {
+                    video.pause();
+                    video.currentTime = 0;
+                }
+                modal.classList.remove('active');
+            }
+        });
+        modal.dataset.hasListeners = 'true';
+    }
 }
 
 // Format filename for caption (remove extension, replace dashes with spaces)
